@@ -4,6 +4,8 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 import commonStyles from "../commonStyles";
 
+import AsyncStorage from '@react-native-async-storage/async-storage'
+
 import todayImage from '../../assets/imgs/today.jpg'
 import moment from 'moment'
 import 'moment/locale/pt-br'
@@ -11,26 +13,45 @@ import 'moment/locale/pt-br'
 import Task from "../components/Task";
 import AddTask from "./AddTask";
 
+const initialState = {
+    showDoneTasks: true,
+    showAddTask: false,
+    visibleTasks: [],
+    tasks: []
+}
+
 export default class TaskList extends Component {
 
     state = {
-        showDoneTasks: true,
-        showAddTask: false,
-        visibleTasks: [],
-        tasks: [{
-            id: Math.random(),
-            descricao: 'Comprar livro de React Native',
-            dataEstimada: new Date(),
-            concluidaEm: new Date(),
-        },
-        {
-            id: Math.random(),
-            descricao: 'Ler livro de React Native',
-            dataEstimada: new Date(),
-            concluidaEm: null,
-        },
-        ]
+        ...initialState
     }
+
+    componentDidMount = async () => {
+        const stateString = await AsyncStorage.getItem('tasksState')
+        const state = jason.parse(stateString) || initialState
+        this.setState(state, this.filterTasks)
+    }
+
+
+    // comitado
+    // state = {
+    //     showDoneTasks: true,
+    //     showAddTask: false,
+    //     visibleTasks: [],
+    //     tasks: [{
+    //         id: Math.random(),
+    //         descricao: 'Comprar livro de React Native',
+    //         dataEstimada: new Date(),
+    //         concluidaEm: new Date(),
+    //     },
+    //     {
+    //         id: Math.random(),
+    //         descricao: 'Ler livro de React Native',
+    //         dataEstimada: new Date(),
+    //         concluidaEm: null,
+    //     },
+    //     ]
+    // }
 
     componentDidMount = () => {
         this.filterTasks()
@@ -61,6 +82,7 @@ export default class TaskList extends Component {
         })
 
         this.setState({ tasks: tasks }, this.filterTasks)
+        AsyncStorage.setItem('taskState', JSON.stringify(this.state))
     }
 
     addTask = newTask => {
